@@ -1,0 +1,14 @@
+export const Bouncify_Api_Key = import.meta.env.VITE_BOUNCIFY_KEY;
+export const Bouncify_Endpoint = import.meta.env.VITE_BOUNCIFY_ENDPOINT;
+export const Weather_Api = import.meta.env.VITE_WETHERAPI_KEY;
+export const IP_Api = import.meta.env.VITE_IPAPI_KEY;
+export const Gpass = import.meta.env.VITE_GOOGLE_APP_PASSWORD;
+export const Gapp = import.meta.env.VITE_GOOGLE_APP_NAME;
+export const Gmail = import.meta.env.VITE_MAIL_ID;
+export const emailJsPublicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
+export const emailJsTempplateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
+export const emailJsTempplateIdResume = import.meta.env.VITE_EMAILJS_TEMPLATE_ID_RESUME;
+export const emailJsServiceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+export const superBaseUrl = import.meta.env.VITE_SUPABASE_URL;
+export const superBaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+export const myWeb = import.meta.env.VITE_MY_WEB;

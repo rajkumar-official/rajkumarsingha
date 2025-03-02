@@ -1,0 +1,48 @@
+.Header {
+  position: fixed;
+  top     : 0;
+  left    : 0;
+  z-index : 99;
+}
+
+.Hamburger_Icon.btn-circle.btn {
+  border          : transparent;
+  background-color: transparent;
+}
+
+.footer {
+  /* bottom: 0;
+  left: 0;
+  position: fixed; */
+  background-color: transparent;
+}
+
+.appbody {
+  margin-top: 72px;
+}
+
+.FooterHeaderText {
+  border-bottom: 2px solid rgb(248, 211, 3);
+  opacity      : 2;
+}
+
+
+.about-second-slidebar::-webkit-scrollbar {
+  display: none;
+}
+
+.about-second-slidebar {
+  -ms-overflow-style: none;
+  scrollbar-width   : none;
+}
+
+.btn:hover {
+  background-color: transparent;
+  border          : none;
+}
+
+@media screen and (max-width: 376px) {
+  .hamberger-small {
+    padding: 0px !important;
+  }
+}

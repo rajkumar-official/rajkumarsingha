@@ -1,0 +1,146 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@keyframes dropAndExpand {
+  0% {
+    opacity  : 0;
+    transform: translateY(-150px) scale(0.8);
+  }
+
+  50% {
+    opacity  : 1;
+    transform: translateY(0) scale(1.1);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes zoomIn {
+  0% {
+    opacity  : 0;
+    transform: scale(0.5);
+  }
+
+  100% {
+    opacity  : 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slideInFromLeft {
+  0% {
+    opacity          : 0;
+    transform        : translateX(-200px);
+    -webkit-transform: translateX(-200px);
+    -moz-transform   : translateX(-200px);
+    -ms-transform    : translateX(-200px);
+    -o-transform     : translateX(-200px);
+  }
+
+  100% {
+    opacity  : 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes gradientAnimation {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-dropAndExpand {
+  animation: dropAndExpand 1.5s ease-in;
+  -webkit-animation: dropAndExpand 1.5s ease-in;
+}
+
+.animate-zoomIn {
+  animation: zoomIn 1.8s ease-out;
+}
+
+.animate-slideInFromLeft {
+  animation: slideInFromLeft 2.5s ease-out;
+}
+
+.animate-gradient {
+  background-size: 400% 400%;
+  animation      : gradientAnimation 10s ease infinite;
+}
+
+.animate-gradient {
+  background-size: 400% 400%;
+  animation      : gradientBG 6s ease infinite;
+}
+
+@keyframes gradientBG {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes flip {
+  0% {
+    transform: rotateY(0deg);
+  }
+
+  100% {
+    transform: rotateY(180deg);
+  }
+}
+
+.skill-card {
+  perspective: 1000px;
+}
+
+.skill-card-front,
+.skill-card-back {
+  backface-visibility: hidden;
+  transition         : transform 0.6s ease-in-out;
+}
+
+.skill-card-back {
+  transform: rotateY(180deg);
+}
+
+.skill-card:hover .skill-card-front {
+  transform: rotateY(180deg);
+}
+
+.skill-card:hover .skill-card-back {
+  transform: rotateY(0deg);
+}
+
+.user-info-container {
+  font-family: 'Poppins', sans-serif;
+}
+
+.info-box {
+  background   : rgba(255, 255, 255, 0.1);
+  padding      : 20px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  transition   : transform 0.3s ease;
+}
+
+.info-box:hover {
+  transform: translateY(-5px);
+}
