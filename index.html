@@ -2,9 +2,43 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/png+xml" href="/raj.png" />
+    <link rel="icon" type="image/png" href="/raj.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Raj Kumar Singha</title>
+    <title>Raj Kumar Singha — Senior Software Engineer</title>
+    <meta
+      name="description"
+      content="Raj Kumar Singha — Senior Software Engineer with 4+ years of experience building full-stack products with Next.js, React, Node.js, TypeScript, PostgreSQL and MongoDB."
+    />
+    <meta name="author" content="Raj Kumar Singha" />
+    <meta
+      name="keywords"
+      content="Raj Kumar Singha, Software Engineer, Full Stack Developer, React, Next.js, Node.js, TypeScript, Portfolio"
+    />
+    <meta name="theme-color" content="#0b1523" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Raj Kumar Singha — Senior Software Engineer" />
+    <meta
+      property="og:description"
+      content="Full-stack engineer specializing in Next.js, React, Node.js and TypeScript. Building secure, scalable, production-grade software."
+    />
+    <meta property="og:image" content="/raj_kumar.jpg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script>
+      // Apply saved theme before first paint to avoid a flash of wrong theme
+      (function () {
+        var saved = localStorage.getItem("theme");
+        var dark =
+          saved === "dark" ||
+          (!saved && window.matchMedia("(prefers-color-scheme: dark)").matches);
+        if (dark) document.documentElement.classList.add("dark");
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

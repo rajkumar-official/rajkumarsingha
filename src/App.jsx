@@ -1,33 +1,35 @@
-import './App.css'
-import { Route, Routes } from 'react-router-dom'
-import Login from './pages/Login'
-import Signup from './pages/Signup'
-import Home from './pages/HomePage';
-import NotFoundPage from './pages/NotFoundPage'
-import ProtectedRoute from './utils/protectedRoutes';
-import BlogPage from './pages/BlogPage';
-import GalleryPage from './pages/GalleryPage';
-import AboutPage from './pages/AboutPage';
-import BuyCoffePage from './pages/BuyCoffePage';
-import ContactMePage from './pages/ContactMePage';
-import UserInfo from './pages/TesPage';
+import { useEffect } from "react";
+import { Route, Routes, useLocation } from "react-router-dom";
+import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
+import HomePage from "./pages/HomePage";
+import NotFoundPage from "./pages/NotFoundPage";
 
 function App() {
+  const { hash } = useLocation();
+
+  // On direct loads like /#contact the browser tries to scroll before React
+  // has rendered the sections — re-run the scroll once they exist.
+  useEffect(() => {
+    if (!hash) return;
+    const el = document.getElementById(hash.slice(1));
+    if (el) {
+      requestAnimationFrame(() =>
+        el.scrollIntoView({ behavior: "smooth", block: "start" })
+      );
+    }
+  }, [hash]);
 
   return (
-    <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/signup" element={<Signup />} />
-      <Route path="/blogs" element={<BlogPage />} />
-      <Route path="/gallery" element={<GalleryPage />} />
-      <Route path="/about" element={<AboutPage />} />
-      <Route path="/contact-me" element={<ContactMePage />} />
-      <Route path="/buy-me-a-coffee" element={<BuyCoffePage />} />
-      <Route path="/test" element={<UserInfo />} />
-      <Route path="*" element={<NotFoundPage />} />
-    </Routes>
-  )
+    <>
+      <Navbar />
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
+      <Footer />
+    </>
+  );
 }
 
-export default App
+export default App;
