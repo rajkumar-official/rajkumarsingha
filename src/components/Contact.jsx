@@ -14,7 +14,22 @@ import {
 import { inputClass } from "../utils/forms";
 import { submitToSheet } from "../utils/sheets";
 
-emailjs.init(emailJsPublicKey);
+// Email is optional — the form still works (via the Google Sheet) when
+// EmailJS isn't configured or its Gmail connection has expired.
+const emailConfigured = Boolean(
+  emailJsPublicKey && emailJsServiceId && emailJsTempplateId
+);
+
+if (emailConfigured) {
+  emailjs.init(emailJsPublicKey);
+}
+
+const sendEmailNotification = (values) =>
+  emailjs.send(emailJsServiceId, emailJsTempplateId, {
+    to_name: values.name,
+    to_email: values.email,
+    message: `Phone: ${values.phone || "—"}\nMessage: ${values.message}`,
+  });
 
 const ContactSchema = Yup.object().shape({
   name: Yup.string().required("Name is required"),
@@ -37,16 +52,25 @@ const Contact = () => {
       // parallel — either one succeeding counts as a delivered message.
       const [sheetResult, emailResult] = await Promise.allSettled([
         submitToSheet({ formType: "contact", ...values }),
-        emailjs.send(emailJsServiceId, emailJsTempplateId, {
-          to_name: values.name,
-          to_email: values.email,
-          message: `Phone: ${values.phone || "—"}\nMessage: ${values.message}`,
-        }),
+        emailConfigured
+          ? sendEmailNotification(values)
+          : Promise.reject(new Error("EmailJS is not configured")),
       ]);
 
       const sheetOk =
         sheetResult.status === "fulfilled" && sheetResult.value === true;
       const emailOk = emailResult.status === "fulfilled";
+
+      if (!emailOk) {
+        const reason = emailResult.reason?.text || emailResult.reason;
+        console.error("EmailJS failed:", reason);
+        if (String(reason).toLowerCase().includes("invalid grant")) {
+          console.error(
+            "Fix: EmailJS dashboard → Email Services → your Gmail service → " +
+              "Reconnect account (tick 'Send email on your behalf')."
+          );
+        }
+      }
 
       if (sheetOk || emailOk) {
         toast.success("Thanks for reaching out! I'll get back to you soon.");
