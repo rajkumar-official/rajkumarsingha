@@ -8,10 +8,19 @@ import { profile } from "../datas/portfolio";
 import { inputClass } from "../utils/forms";
 import { submitToSheet } from "../utils/sheets";
 
+// Trim before validating so spaces alone can never satisfy a rule
+const trimmed = () =>
+  Yup.string().transform((v) => (typeof v === "string" ? v.trim() : v));
+
 const ResumeSchema = Yup.object().shape({
-  name: Yup.string().required("Name is required"),
-  email: Yup.string()
+  name: trimmed()
+    .min(2, "Name must be at least 2 characters")
+    .max(60, "Name must be under 60 characters")
+    .matches(/^[A-Za-z][A-Za-z\s.'-]*$/, "Name can only contain letters")
+    .required("Name is required"),
+  email: trimmed()
     .email("Please enter a valid email address")
+    .max(100, "Email must be under 100 characters")
     .required("Email is required"),
   purpose: Yup.string().required("Please select a purpose"),
 });
@@ -39,7 +48,12 @@ const ResumeModal = ({ isOpen, onClose }) => {
   }, [isOpen, onClose]);
 
   const handleSubmit = async (values, { setSubmitting, resetForm }) => {
-    await submitToSheet({ formType: "resume", ...values });
+    await submitToSheet({
+      formType: "resume",
+      name: values.name.trim(),
+      email: values.email.trim(),
+      purpose: values.purpose,
+    });
     // Never block the download on sheet availability — the lead capture is
     // best-effort, the visitor always gets the resume.
     triggerDownload();
@@ -107,7 +121,8 @@ const ResumeModal = ({ isOpen, onClose }) => {
                       id="resume-name"
                       name="name"
                       type="text"
-                      placeholder="Your name"
+                      maxLength={60}
+                      placeholder="Your full name"
                       className={inputClass(errors.name && touched.name)}
                     />
                     <ErrorMessage

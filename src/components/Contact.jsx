@@ -34,31 +34,51 @@ const sendEmailNotification = (values) =>
     message: `Phone: ${values.phone || "—"}\nMessage: ${values.message}`,
   });
 
+// Trim before validating so spaces alone can never satisfy a rule
+const trimmed = () =>
+  Yup.string().transform((v) => (typeof v === "string" ? v.trim() : v));
+
 const ContactSchema = Yup.object().shape({
-  name: Yup.string().required("Name is required"),
-  email: Yup.string()
+  name: trimmed()
+    .min(2, "Name must be at least 2 characters")
+    .max(60, "Name must be under 60 characters")
+    .matches(/^[A-Za-z][A-Za-z\s.'-]*$/, "Name can only contain letters")
+    .required("Name is required"),
+  email: trimmed()
     .email("Please enter a valid email address")
+    .max(100, "Email must be under 100 characters")
     .required("Email is required"),
-  phone: Yup.string().matches(
-    /^\d{10}$/,
-    "Please enter a valid 10-digit phone number"
-  ),
-  message: Yup.string()
-    .min(10, "Message should be at least 10 characters long")
+  phone: Yup.string()
+    .transform((v) => (typeof v === "string" ? v.replace(/[\s-]/g, "") : v))
+    .matches(/^[6-9]\d{9}$/, {
+      message: "Enter a valid 10-digit mobile number (starts with 6-9)",
+      excludeEmptyString: true,
+    }),
+  message: trimmed()
+    .min(10, "Message should be at least 10 characters")
+    .max(1000, "Message must be under 1000 characters")
     .required("Message is required"),
 });
 
 const Contact = () => {
   const handleSubmit = async (values, { setSubmitting, resetForm }) => {
+    // Store the cleaned values, not the raw keystrokes
+    const clean = {
+      name: values.name.trim(),
+      email: values.email.trim(),
+      phone: values.phone.replace(/[\s-]/g, ""),
+      message: values.message.trim(),
+    };
+
     try {
       // The Google Sheet is the primary store; email is an optional
       // notification on top and never fails a submission on its own.
-      const sheetOk = await submitToSheet({ formType: "contact", ...values });
+      const sheetOk = await submitToSheet({ formType: "contact", ...clean });
 
       let emailOk = false;
       if (emailConfigured) {
         try {
-          await sendEmailNotification(values);
+          await sendEmailNotification(clean);
           emailOk = true;
         } catch (emailError) {
           console.error("EmailJS failed:", emailError?.text || emailError);
@@ -158,7 +178,8 @@ const Contact = () => {
                         id="name"
                         name="name"
                         type="text"
-                        placeholder="Your name"
+                        maxLength={60}
+                        placeholder="Your full name"
                         className={inputClass(errors.name && touched.name)}
                       />
                       <ErrorMessage
@@ -203,7 +224,9 @@ const Contact = () => {
                       id="phone"
                       name="phone"
                       type="tel"
-                      placeholder="10-digit phone number"
+                      inputMode="numeric"
+                      maxLength={12}
+                      placeholder="10-digit mobile number"
                       className={inputClass(errors.phone && touched.phone)}
                     />
                     <ErrorMessage
@@ -225,7 +248,8 @@ const Contact = () => {
                       id="message"
                       name="message"
                       rows="5"
-                      placeholder="Tell me about your project…"
+                      maxLength={1000}
+                      placeholder="Write your message here..."
                       className={`${inputClass(
                         errors.message && touched.message
                       )} resize-none`}
