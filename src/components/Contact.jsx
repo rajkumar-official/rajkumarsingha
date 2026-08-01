@@ -11,6 +11,8 @@ import {
   emailJsServiceId,
   emailJsTempplateId,
 } from "../utils/constants";
+import { inputClass } from "../utils/forms";
+import { submitToSheet } from "../utils/sheets";
 
 emailjs.init(emailJsPublicKey);
 
@@ -28,23 +30,30 @@ const ContactSchema = Yup.object().shape({
     .required("Message is required"),
 });
 
-const inputClass = (hasError) =>
-  `w-full rounded-xl border bg-white px-4 py-3 text-sm text-slate-800 outline-none transition-all duration-200 placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/25 dark:bg-white/5 dark:text-white dark:placeholder:text-slate-500 ${
-    hasError
-      ? "border-red-400 dark:border-red-500/60"
-      : "border-slate-200 dark:border-white/10"
-  }`;
-
 const Contact = () => {
   const handleSubmit = async (values, { setSubmitting, resetForm }) => {
     try {
-      await emailjs.send(emailJsServiceId, emailJsTempplateId, {
-        to_name: values.name,
-        to_email: values.email,
-        message: `Phone: ${values.phone || "—"}\nMessage: ${values.message}`,
-      });
-      toast.success("Thanks for reaching out! I'll get back to you soon.");
-      resetForm();
+      // Save to the Google Sheet and send the email notification in
+      // parallel — either one succeeding counts as a delivered message.
+      const [sheetResult, emailResult] = await Promise.allSettled([
+        submitToSheet({ formType: "contact", ...values }),
+        emailjs.send(emailJsServiceId, emailJsTempplateId, {
+          to_name: values.name,
+          to_email: values.email,
+          message: `Phone: ${values.phone || "—"}\nMessage: ${values.message}`,
+        }),
+      ]);
+
+      const sheetOk =
+        sheetResult.status === "fulfilled" && sheetResult.value === true;
+      const emailOk = emailResult.status === "fulfilled";
+
+      if (sheetOk || emailOk) {
+        toast.success("Thanks for reaching out! I'll get back to you soon.");
+        resetForm();
+      } else {
+        toast.error("Couldn't send your message. Please email me directly.");
+      }
     } catch (error) {
       console.error("Error sending message:", error);
       toast.error("Couldn't send your message. Please email me directly.");

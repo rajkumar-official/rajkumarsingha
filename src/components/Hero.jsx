@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { FiArrowRight, FiDownload } from "react-icons/fi";
+import ResumeModal from "./ResumeModal";
 import { profile, socials, stats } from "../datas/portfolio";
 
 // Lightweight typewriter for the rotating role line
@@ -36,6 +37,7 @@ const useTypewriter = (words, typeSpeed = 70, deleteSpeed = 40, pause = 1800) =>
 
 const Hero = () => {
   const typed = useTypewriter(profile.roles);
+  const [resumeModalOpen, setResumeModalOpen] = useState(false);
 
   return (
     <section id="home" className="relative overflow-hidden pt-32 sm:pt-36">
@@ -83,14 +85,14 @@ const Hero = () => {
               View My Work
               <FiArrowRight className="transition-transform duration-300 group-hover:translate-x-1" />
             </a>
-            <a
-              href={profile.resumeUrl}
-              download="Raj_Kumar_Singha_Resume.pdf"
+            <button
+              type="button"
+              onClick={() => setResumeModalOpen(true)}
               className="btn-outline group"
             >
               <FiDownload className="transition-transform duration-300 group-hover:translate-y-0.5" />
               Download Resume
-            </a>
+            </button>
           </div>
 
           <div className="mt-8 flex items-center justify-center gap-3 lg:justify-start">
@@ -164,6 +166,11 @@ const Hero = () => {
           ))}
         </motion.div>
       </div>
+
+      <ResumeModal
+        isOpen={resumeModalOpen}
+        onClose={() => setResumeModalOpen(false)}
+      />
     </section>
   );
 };
