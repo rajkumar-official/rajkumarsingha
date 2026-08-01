@@ -1,44 +1,43 @@
 /**
- * Google Apps Script for the portfolio forms.
+ * Google Apps Script for the portfolio forms — SINGLE self-contained function.
  *
- * Receives POSTs from the website and appends each submission as a row:
+ * Appends each website submission as a row:
  *   - Contact form      -> "Contact Form" tab
  *   - Resume downloads  -> "Resume Downloads" tab
  *
- * SETUP (one time):
- * 1. Create a Google Sheet (sheets.new).
- * 2. Extensions > Apps Script, delete the default code, paste this file.
- * 3. Deploy > New deployment > type "Web app":
- *      - Execute as:      Me
- *      - Who has access:  Anyone
- * 4. Authorize when prompted, then copy the Web app URL.
- * 5. Put it in the site's .env as VITE_SHEETS_WEBAPP_URL.
+ * HOW TO INSTALL (copy EVERYTHING in this file):
+ * 1. Open your Google Sheet > Extensions > Apps Script.
+ * 2. Select ALL existing code (Ctrl+A), delete it, paste this whole file.
+ * 3. Save (Ctrl+S).
+ * 4. Deploy > Manage deployments > pencil icon (Edit) >
+ *    Version: "New version" > Deploy.  (URL stays the same.)
  *
- * NOTE: after any code change here you must create a NEW deployment
- * (or deploy a new version) — the URL only serves deployed code.
+ * If you ever edit this code again, repeat step 4 — the URL only serves
+ * DEPLOYED versions, not saved drafts.
  */
 
 function doPost(e) {
   try {
     var data = JSON.parse(e.postData.contents);
     var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var isResume = data.formType === "resume";
 
-    if (data.formType === "resume") {
-      var sheet = getOrCreateSheet(ss, "Resume Downloads", [
-        "Timestamp",
-        "Name",
-        "Email",
-        "Purpose",
-      ]);
+    var tabName = isResume ? "Resume Downloads" : "Contact Form";
+    var headers = isResume
+      ? ["Timestamp", "Name", "Email", "Purpose"]
+      : ["Timestamp", "Name", "Email", "Phone", "Message"];
+
+    var sheet = ss.getSheetByName(tabName);
+    if (!sheet) {
+      sheet = ss.insertSheet(tabName);
+      sheet.appendRow(headers);
+      sheet.getRange(1, 1, 1, headers.length).setFontWeight("bold");
+      sheet.setFrozenRows(1);
+    }
+
+    if (isResume) {
       sheet.appendRow([new Date(), data.name, data.email, data.purpose || ""]);
     } else {
-      var sheet = getOrCreateSheet(ss, "Contact Form", [
-        "Timestamp",
-        "Name",
-        "Email",
-        "Phone",
-        "Message",
-      ]);
       sheet.appendRow([
         new Date(),
         data.name,
@@ -56,15 +55,4 @@ function doPost(e) {
       JSON.stringify({ result: "error", message: String(err) })
     ).setMimeType(ContentService.MimeType.JSON);
   }
-}
-
-function getOrCreateSheet(ss, name, headers) {
-  var sheet = ss.getSheetByName(name);
-  if (!sheet) {
-    sheet = ss.insertSheet(name);
-    sheet.appendRow(headers);
-    sheet.getRange(1, 1, 1, headers.length).setFontWeight("bold");
-    sheet.setFrozenRows(1);
-  }
-  return sheet;
 }

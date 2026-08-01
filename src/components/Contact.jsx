@@ -14,11 +14,14 @@ import {
 import { inputClass } from "../utils/forms";
 import { submitToSheet } from "../utils/sheets";
 
-// Email is optional — the form still works (via the Google Sheet) when
-// EmailJS isn't configured or its Gmail connection has expired.
-const emailConfigured = Boolean(
-  emailJsPublicKey && emailJsServiceId && emailJsTempplateId
-);
+// Email notifications are OFF until the EmailJS Gmail connection is
+// re-authorized (dashboard.emailjs.com > Email Services > Reconnect).
+// Flip to true once reconnected — submissions always save to the Sheet.
+const EMAIL_ENABLED = false;
+
+const emailConfigured =
+  EMAIL_ENABLED &&
+  Boolean(emailJsPublicKey && emailJsServiceId && emailJsTempplateId);
 
 if (emailConfigured) {
   emailjs.init(emailJsPublicKey);
@@ -48,27 +51,17 @@ const ContactSchema = Yup.object().shape({
 const Contact = () => {
   const handleSubmit = async (values, { setSubmitting, resetForm }) => {
     try {
-      // Save to the Google Sheet and send the email notification in
-      // parallel — either one succeeding counts as a delivered message.
-      const [sheetResult, emailResult] = await Promise.allSettled([
-        submitToSheet({ formType: "contact", ...values }),
-        emailConfigured
-          ? sendEmailNotification(values)
-          : Promise.reject(new Error("EmailJS is not configured")),
-      ]);
+      // The Google Sheet is the primary store; email is an optional
+      // notification on top and never fails a submission on its own.
+      const sheetOk = await submitToSheet({ formType: "contact", ...values });
 
-      const sheetOk =
-        sheetResult.status === "fulfilled" && sheetResult.value === true;
-      const emailOk = emailResult.status === "fulfilled";
-
-      if (!emailOk) {
-        const reason = emailResult.reason?.text || emailResult.reason;
-        console.error("EmailJS failed:", reason);
-        if (String(reason).toLowerCase().includes("invalid grant")) {
-          console.error(
-            "Fix: EmailJS dashboard → Email Services → your Gmail service → " +
-              "Reconnect account (tick 'Send email on your behalf')."
-          );
+      let emailOk = false;
+      if (emailConfigured) {
+        try {
+          await sendEmailNotification(values);
+          emailOk = true;
+        } catch (emailError) {
+          console.error("EmailJS failed:", emailError?.text || emailError);
         }
       }
 
